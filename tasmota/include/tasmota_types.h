@@ -483,6 +483,18 @@ typedef union {
   };
 } DisplayOptions;
 
+// Custom struct for aquarium daily light cycle settings
+typedef struct {
+  uint8_t sunrise_hour;             // Hour of sunrise (0-23)
+  uint8_t sunrise_minute;           // Minute of sunrise (0-59)
+  uint8_t sunset_hour;              // Hour of sunset (0-23)
+  uint8_t sunset_minute;            // Minute of sunset (0-59)
+  uint8_t peak_brightness_color[3]; // RGB color at peak brightness (e.g., R,G,B)
+  uint8_t override_enabled;         // 0 = normal operation, 1 = override active
+  uint8_t override_color[3];        // RGB color to use when override is enabled
+  uint8_t reserved[11];             // Keep remaining bytes for future expansion
+} AquariumLightSettings;
+
 const uint32_t settings_text_size = 699;   // Settings->text_pool[size] = Settings->display_model (2D2) - Settings->text_pool (017)
 const uint8_t MAX_TUYA_FUNCTIONS = 16;
 const uint8_t PARAM8_SIZE = 18;            // Number of param bytes (SetOption)
@@ -602,6 +614,7 @@ typedef struct {
   myio          my_gp;                     // 3AC  2x18 bytes (ESP8266) / 2x40 bytes (ESP32) / 2x21 bytes (ESP32-C2) / 2x22 bytes (ESP32-C3) / 2x31 bytes (ESP32-C6) / 2x47 bytes (ESP32-S2)
 #ifdef ESP8266
   uint16_t      gpio16_converted;          // 3D0
+  // Put aquarium settings struct here
   uint8_t       free_esp8266_3D2[42];      // 3D2
 #endif  // ESP8266
 #ifdef ESP32
@@ -786,7 +799,10 @@ typedef struct {
   uint8_t       web_color2[2][3];          // EA0  Needs to be on integer / 3 distance from web_color
   uint16_t      zcdimmerset[5];            // EA6
 
-  uint8_t       free_eb0[22];              // EB0  22 bytes
+  union {
+    uint8_t data[22];
+    AquariumLightSettings aquarium_light_settings;
+  } free_eb0; 
 
   uint8_t       shift595_device_count;     // EC6
   uint8_t       sta_config;                // EC7

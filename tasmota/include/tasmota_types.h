@@ -489,10 +489,10 @@ typedef struct {
   uint8_t sunrise_minute;           // Minute of sunrise (0-59)
   uint8_t sunset_hour;              // Hour of sunset (0-23)
   uint8_t sunset_minute;            // Minute of sunset (0-59)
-  uint8_t peak_brightness_color[3]; // RGB color at peak brightness (e.g., R,G,B)
+  uint8_t peak_brightness_color[4]; // RGBW color at peak brightness
   uint8_t override_enabled;         // 0 = normal operation, 1 = override active
-  uint8_t override_color[3];        // RGB color to use when override is enabled
-  uint8_t reserved[11];             // Keep remaining bytes for future expansion
+  uint8_t override_color[4];        // RGBW color to use when override is enabled
+  uint8_t reserved[9];             // Keep remaining bytes for future expansion
 } AquariumLightSettings;
 
 const uint32_t settings_text_size = 699;   // Settings->text_pool[size] = Settings->display_model (2D2) - Settings->text_pool (017)

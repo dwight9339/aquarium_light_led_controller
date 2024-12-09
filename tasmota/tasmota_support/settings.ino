@@ -1435,6 +1435,21 @@ void SettingsDefaultSet2(void) {
   Settings->flag5 = flag5;
   Settings->flag6 = flag6;
   Settings->mbflag2 = mbflag2;
+
+  // Aquarium Settings
+  Settings->free_eb0.aquarium_light_settings.sunrise_hour = 6;     // 6:00 AM
+  Settings->free_eb0.aquarium_light_settings.sunrise_minute = 0;
+  Settings->free_eb0.aquarium_light_settings.sunset_hour = 18;     // 6:00 PM
+  Settings->free_eb0.aquarium_light_settings.sunset_minute = 0;
+  Settings->free_eb0.aquarium_light_settings.peak_brightness_color[0] = 255; // R
+  Settings->free_eb0.aquarium_light_settings.peak_brightness_color[1] = 255; // G
+  Settings->free_eb0.aquarium_light_settings.peak_brightness_color[2] = 255; // B
+  Settings->free_eb0.aquarium_light_settings.peak_brightness_color[3] = 255; // W
+  Settings->free_eb0.aquarium_light_settings.override_enabled = 0;
+  Settings->free_eb0.aquarium_light_settings.override_color[0] = 0;
+  Settings->free_eb0.aquarium_light_settings.override_color[1] = 0;
+  Settings->free_eb0.aquarium_light_settings.override_color[2] = 0;
+  Settings->free_eb0.aquarium_light_settings.override_color[3] = 0;
 }
 
 void SettingsDefaultSet3(void) {

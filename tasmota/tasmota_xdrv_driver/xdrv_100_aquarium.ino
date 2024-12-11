@@ -3,29 +3,24 @@
 #include "include/tasmota_types.h"  // Access to TSettings and AquariumLightSettings
 #include <math.h>                   // For sine functions
 
-// This variable will be set to true after initialization
-bool initSuccess = false;
+bool init_success = false;
 
-/* 
-  Optional: if you need to pass any command for your device 
-  Commands are issued in Console or Web Console
-  Commands:
-    Say_Hello  - Only prints some text. Can be made something more useful...
-    SendMQTT   - Send a MQTT example message
-    Help       - Prints a list of available commands  
-*/
-
+/*********************************************************************************************\
+ * Commands
+\*********************************************************************************************/
 const char CommandStrs[] PROGMEM = "|"  // No Prefix
   "UpdateSunriseTime|" 
   "UpdateSunsetTime|"
   "UpdatePeakBrightness|"
-  "OverrideLight";
+  "ToggleOverride|"
+  "UpdateOverrideColor";
 
 void (* const CommandFuncs[])(void) PROGMEM = {
   &CmdUpdateSunriseTime,
   &CmdUpdateSunsetTime,
   &CmdUpdatePeakBrightness,
-  &CmdOverrideLight
+  &CmdToggleOverride,
+  &CmdUpdateOverrideColor
 };
 
 void CmdUpdateSunriseTime(void) {
@@ -79,37 +74,44 @@ void CmdUpdatePeakBrightness(void) {
     }
 }
 
-void CmdOverrideLight(void) {
-    uint8_t enable, r, g, b, w;
-    if (sscanf(XdrvMailbox.data, "%hhu,%hhu,%hhu,%hhu,%hhu", &enable, &r, &g, &b, &w) == 5) {
-        if (enable <= 1 && r <= 255 && g <= 255 && b <= 255 && w <= 255) {
-            Settings->free_eb0.aquarium_light_settings.override_enabled = enable;
+void CmdToggleOverride(void) {
+  if (Settings == NULL) {
+    ResponseCmndChar(PSTR("Error: Settings pointer is NULL."));
+    return;
+  }
+
+  uint8_t current_override_status = Settings->free_eb0.aquarium_light_settings.override_enabled;
+  Settings->free_eb0.aquarium_light_settings.override_enabled = !current_override_status;
+  SettingsSave(0);
+  Response_P(PSTR("{\"Command\":\"ToggleOverride\",\"Status\":%d}"), Settings->free_eb0.aquarium_light_settings.override_enabled);
+}
+
+void CmdUpdateOverrideColor(void) {
+    uint8_t r, g, b, w;
+    if (sscanf(XdrvMailbox.data, "%hhu,%hhu,%hhu,%hhu", &r, &g, &b, &w) == 4) {
+        if (r <= 255 && g <= 255 && b <= 255 && w <= 255) {
             Settings->free_eb0.aquarium_light_settings.override_color[0] = r;
             Settings->free_eb0.aquarium_light_settings.override_color[1] = g;
             Settings->free_eb0.aquarium_light_settings.override_color[2] = b;
             Settings->free_eb0.aquarium_light_settings.override_color[3] = w;
             SettingsSave(0);
-            Response_P(PSTR("{\"%s\":\"Override status updated. Override enabled: %d, Override color: RGBW(%d,%d,%d,%d)\"}"), XdrvMailbox.command, enable, r, g, b, w);
+            Response_P(PSTR("{\"%s\":\"Override color updated: RGBW(%d,%d,%d,%d)\"}"), XdrvMailbox.command, r, g, b, w);
         } else {
-            ResponseCmndChar(PSTR("Invalid input. Enable: 0 or 1; RGBW: 0-255 each."));
+            ResponseCmndChar(PSTR("Invalid input. RGBW: 0-255 each."));
         }
     } else {
-        ResponseCmndChar(PSTR("Syntax: OverrideLight <Enable>,<R>,<G>,<B>,<W>"));
+        ResponseCmndChar(PSTR("Syntax: UpdateOverrideColor <R>,<G>,<B>,<W>"));
     }
 }
 
 /*********************************************************************************************\
  * Tasmota Functions
 \*********************************************************************************************/
-void AquariumInit()
-{
+void AquariumInit() {
   AddLog(LOG_LEVEL_INFO, PSTR("Initializing aquarium light driver"));
+  // Any necessary initialization logic goes here...
 
-  Serial.begin(115200);
-
-  // Set initSuccess at the very end of the init process
-  // Init is successful
-  initSuccess = true;
+  init_success = true;
 }
 
 uint32_t GetMillisecondsSinceMidnight() {
@@ -119,7 +121,7 @@ uint32_t GetMillisecondsSinceMidnight() {
     return milliseconds;
 }
 
-static uint8_t prev_channels[5] = {0, 0, 0, 0, 0}; // Store previous RGBW values
+static uint8_t prev_channels[5] = {0, 0, 0, 0, 0};
 
 void SmoothTransition(uint8_t* target_channels, uint8_t* smooth_channels, float alpha) {
     for (int i = 0; i < 5; i++) {
@@ -128,7 +130,7 @@ void SmoothTransition(uint8_t* target_channels, uint8_t* smooth_channels, float 
     memcpy(prev_channels, smooth_channels, sizeof(prev_channels)); // Update previous values
 }
 
-// Function to update aquarium brightness based on settings and time
+// Updates aquarium brightness based on settings and time
 void UpdateAquariumBrightness() {
     uint32_t ms_since_midnight = GetMillisecondsSinceMidnight();
 
@@ -141,9 +143,9 @@ void UpdateAquariumBrightness() {
     // Handle override
     if (Settings->free_eb0.aquarium_light_settings.override_enabled) {
         uint8_t* override_color = Settings->free_eb0.aquarium_light_settings.override_color;
-        uint8_t channels[5] = {override_color[0], override_color[1], override_color[2], 0, override_color[3]};
+        uint8_t channels[5] = {override_color[0], override_color[1], override_color[2], override_color[3], override_color[3]};
         light_controller.changeChannels(channels, true);
-        AddLog(LOG_LEVEL_DEBUG, PSTR("Aquarium Override Enabled: Setting color RGBW(%d,%d,%d,%d)"),
+        AddLog(LOG_LEVEL_DEBUG, PSTR("Aquarium override enabled: Setting color RGBW(%d,%d,%d,%d)"),
                override_color[0], override_color[1], override_color[2], override_color[3]);
         return;
     }
@@ -153,7 +155,7 @@ void UpdateAquariumBrightness() {
         // Turn lights off
         uint8_t channels[5] = { 0, 0, 0, 0, 0 };
         light_controller.changeChannels(channels, true);
-        AddLog(LOG_LEVEL_DEBUG, PSTR("Aquarium Lights Off: Outside sunrise-sunset window"));
+        AddLog(LOG_LEVEL_DEBUG, PSTR("Aquarium lights off: Outside sunrise-sunset window"));
         return;
     }
 
@@ -172,26 +174,24 @@ void UpdateAquariumBrightness() {
     uint8_t B = (uint8_t)(peak_color[2] * brightness_factor);
     uint8_t W = (uint8_t)(peak_color[3] * brightness_factor);
 
-    uint8_t target_channels[5] = {R, G, B, 0, W};
+    uint8_t target_channels[5] = {R, G, B, W, W};
     uint8_t smooth_channels[5];
     SmoothTransition(target_channels, smooth_channels, 0.5);
     light_controller.changeChannels(smooth_channels, false);
 
-    AddLog(LOG_LEVEL_DEBUG, PSTR("Aquarium Lights Set to RGBW(%d,%d,%d,%d)"), R, G, B, W);
+    AddLog(LOG_LEVEL_DEBUG, PSTR("Aquarium lights set to RGBW(%d,%d,%d,%d)"), R, G, B, W);
 }
 
 /*********************************************************************************************\
  * Interface
 \*********************************************************************************************/
-bool Xdrv100(uint32_t function)
-{
+bool Xdrv100(uint32_t function) {
   bool result = false;
 
   if (FUNC_INIT == function) {
     AquariumInit();
   }
-  else if (initSuccess) {
-
+  else if (init_success) {
     switch (function) {
       // Select suitable interval for polling your function
         case FUNC_EVERY_250_MSECOND:
@@ -200,15 +200,12 @@ bool Xdrv100(uint32_t function)
 
       // Command support
       case FUNC_COMMAND:
-        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Calling custom command"));
+        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Calling aquarium command"));
         result = DecodeCommand(CommandStrs, CommandFuncs);
         break;
-
     }
-
   }
 
   return result;
 }
-
 #endif  // USE_AQUARIUM_LIGHTING

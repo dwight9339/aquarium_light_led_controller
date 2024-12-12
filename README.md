@@ -19,7 +19,7 @@ The following commands can be executed either in the Tasmota web console or via 
 To install the firmware on your device and connect it to your home network, download the latest build [here](https://github.com/dwight9339/aquarium_light_led_controller/releases) and follow the instructions provided [here](https://tasmota.github.io/docs/Getting-Started/).
 
 ## Integrating with your Smart Home System
-To integrate the light with your smart home system, you'll need to have an MQTT broker running and add the light as a client. The exact methods for doing so will depend on your specific system.
+To integrate the light with your smart home system, you'll need to have an MQTT broker running and add the light as a client. The exact methods for doing so will depend on your specific system. For example, here is my Mosquitto broker configuration for Home Assistant.
 ![Screenshot of Home Assistant add-ons page with an arrow pointing to the Mosquitto Broker tile.](https://github.com/user-attachments/assets/d68be58b-328d-40b1-980d-a2a4f4c0e39b)
 ![Screenshot of the Mostquitto MQTT broker configuration page with an arrow pointing to client credentials for the Tasmota device.](https://github.com/user-attachments/assets/d8e6db05-7a5b-4356-97e2-2a2acfdb1aee)
 

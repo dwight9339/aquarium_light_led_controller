@@ -6,9 +6,15 @@ The project implements a custom driver for Tasmota and turns an ESP8266-based de
 - **Onboard Brightness Ramping**: Brightness smoothly ramps from 0 to a specified full brightness value for each RGBW channel and back down to 0 over the course of a day between specified sunrise and sunset times following a sine-squared function. Implementing brightness ramping directly on the controller makes it more robust against wireless connectivity issues associated with controlling the light via a central home automation server and relieves such a server from having to execute updates at the rates required to produce a smooth lighting curve.
 - **Override of Default Functionality**: The ramping functionality described previously is the default for the device but can be overridden if desired.
 
+## Custom Commands
+The following commands can be executed either in the Tasmota web console or via MQTT to update lighting parameters:
+- `UpdateSunriseTime {hh}:{mm}`: Sets the `sunrise_hour` and `sunrise_minute` parameters to hour (`hh`) and minute (`mm`) respectively.
+- `UpdateSunsetTime {hh}:{mm}`: Sets the `sunset_hour` and `ssunset_minute` parameters to hour (`hh`) and minute (`mm`) respectively.
+- `UpdatePeakBrightness {r},{g},{b},{w}`: Sets the maximum brightness (0-255) reached by each of the light channels (R, G, B, and W(cold white or warm white depending on your LED strip)).
+- `ToggleOverride`: Toggles the parameter which determines whether or not the default functionality is overridden.
+- `UpdateOverrideColor {r},{g},{b},{w}`: Sets the brightness (0-255) for each channel when the default functionality is overridden.
+- `UpdateOverride`: Updates the override parameters (on-off and channel brightnesses) but expects a JSON object of the form: <br></br> `{"status": "ON|OFF", "color": {"r":{0-255}, "g": {0-255}, "b": {0-255}, "w": {0-255}}}` <br></br>
 
-
-<hr></hr>
 <hr></hr>
 <hr></hr>
 

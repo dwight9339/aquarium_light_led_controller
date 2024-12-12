@@ -24,7 +24,7 @@ To integrate the light with your smart home system, you'll need to have an MQTT 
 ![Screenshot of the Mostquitto MQTT broker configuration page with an arrow pointing to client credentials for the Tasmota device.](https://github.com/user-attachments/assets/d8e6db05-7a5b-4356-97e2-2a2acfdb1aee)
 
 You can then follow the instructions provided [here](https://tasmota.github.io/docs/MQTT/#configure-mqtt-using-webui) to configure MQTT on your device.
-![tasmota_mqtt_config](https://github.com/user-attachments/assets/8d867807-e168-4539-9161-3d3d9392623e)
+![Screenshot of Tasmota MQTT config form with example data.](https://github.com/user-attachments/assets/8d867807-e168-4539-9161-3d3d9392623e)
 
 ## Home Assistant MQTT Controller
 
@@ -41,7 +41,7 @@ mqtt:
 ```
 
 Replace `your_light_topic` with the actual topic used by your light.
-![aquarium_light_mqtt_topic](https://github.com/user-attachments/assets/d8832239-3033-4fbf-b2f8-093f7993543b)
+![Screenshot of Tasmota web console output with device's topic underlined.](https://github.com/user-attachments/assets/984ee050-8e99-4e7f-9f2d-d0e5271aa2d6)
 
 <hr></hr>
 <hr></hr>

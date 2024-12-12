@@ -34,13 +34,13 @@ mqtt:
   - light:
       schema: json
       name: aquarium_light_override
-      command_topic: "cmnd/your_light/UpdateOverride"
-      state_topic: "stat/your_light/RESULT"
+      command_topic: "cmnd/your_light_topic/UpdateOverride"
+      state_topic: "stat/your_light_topic/RESULT"
       brightness: true
       supported_color_modes: ["rgbw"]
 ```
 
-Replace `your_light` with the actual topic used by your light.
+Replace `your_light_topic` with the actual topic used by your light.
 ![aquarium_light_mqtt_topic](https://github.com/user-attachments/assets/d8832239-3033-4fbf-b2f8-093f7993543b)
 
 <hr></hr>

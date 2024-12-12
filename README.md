@@ -13,7 +13,7 @@ The following commands can be executed either in the Tasmota web console or via 
 - `UpdatePeakBrightness {r},{g},{b},{w}`: Sets the maximum brightness (0-255) reached by each of the light channels (R, G, B, and W(cold white or warm white depending on your LED strip)).
 - `ToggleOverride`: Toggles the parameter which determines whether or not the default functionality is overridden.
 - `UpdateOverrideColor {r},{g},{b},{w}`: Sets the brightness (0-255) for each channel when the default functionality is overridden.
-- `UpdateOverride`: Updates the override parameters (on-off and channel brightnesses) but expects a JSON object of the form: <br></br> `{"status": "ON|OFF", "color": {"r":{0-255}, "g": {0-255}, "b": {0-255}, "w": {0-255}}}` <br></br>
+- `UpdateOverride`: Updates the override parameters (on-off and channel brightnesses) but expects a JSON object of the form: <br></br> `{"status": "ON|OFF", "color": {"r":{0-255}, "g": {0-255}, "b": {0-255}, "w": {0-255}}}` <br></br> Mainly used when implementing MQTT-based controls in smart home systems like Home Assistant.
 
 <hr></hr>
 <hr></hr>

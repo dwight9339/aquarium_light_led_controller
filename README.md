@@ -1,4 +1,4 @@
-## This firmware is built on
+# This firmware is built on
 ![Tasmota logo](/tools/logo/TASMOTA_FullLogo_Vector.svg#gh-light-mode-only)![Tasmota logo](/tools/logo/TASMOTA_FullLogo_Vector_White.svg#gh-dark-mode-only)
 
 # Aquarium LED Controller

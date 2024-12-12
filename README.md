@@ -20,7 +20,7 @@ To install the firmware on your device and connect it to your home network, down
 
 ## Integrating with your Smart Home System
 To integrate the light with your smart home system, you'll need to have an MQTT broker running and add the light as a client. The exact methods for doing so will depend on your specific system.
-![Screenshot of Home Assistant add-ons page with an arrow pointing to the Mosquitto Broker tile.](https://github.com/user-attachments/assets/c94a8e80-486c-42af-87aa-adb7eb8f27ce)
+![Screenshot of Home Assistant add-ons page with an arrow pointing to the Mosquitto Broker tile.](https://github.com/user-attachments/assets/d68be58b-328d-40b1-980d-a2a4f4c0e39b)
 ![Screenshot of the Mostquitto MQTT broker configuration page with an arrow pointing to client credentials for the Tasmota device.](https://github.com/user-attachments/assets/d8e6db05-7a5b-4356-97e2-2a2acfdb1aee)
 
 You can then follow the instructions provided [here](https://tasmota.github.io/docs/MQTT/#configure-mqtt-using-webui) to configure MQTT on your device.

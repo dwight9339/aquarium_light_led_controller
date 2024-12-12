@@ -3,7 +3,9 @@
 
 <hr></hr>
 
-These are select excerpts from the full Tasmota ReadMe document. The full thing can be found [here](https://github.com/arendst/Tasmota/blob/development/README.md).
+The following are select excerpts from the full Tasmota ReadMe document. The full thing can be found [here](https://github.com/arendst/Tasmota/blob/development/README.md).
+
+<hr></hr>
 
 ## Easy install
 

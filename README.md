@@ -13,7 +13,35 @@ The following commands can be executed either in the Tasmota web console or via 
 - `UpdatePeakBrightness {r},{g},{b},{w}`: Sets the maximum brightness (0-255) reached by each of the light channels (R, G, B, and W(cold white or warm white depending on your LED strip)).
 - `ToggleOverride`: Toggles the parameter which determines whether or not the default functionality is overridden.
 - `UpdateOverrideColor {r},{g},{b},{w}`: Sets the brightness (0-255) for each channel when the default functionality is overridden.
-- `UpdateOverride`: Updates the override parameters (on-off and channel brightnesses) but expects a JSON object of the form: <br></br> `{"status": "ON|OFF", "color": {"r":{0-255}, "g": {0-255}, "b": {0-255}, "w": {0-255}}}` <br></br> Mainly used when implementing MQTT-based controls in smart home systems like Home Assistant.
+- `UpdateOverride`: Mainly used when implementing MQTT-based controls in smart home systems like Home Assistant. Updates the override parameters (on-off and channel brightnesses) but expects a JSON object of the form: <br></br> `{"status": "ON|OFF", "color": {"r":{0-255}, "g": {0-255}, "b": {0-255}, "w": {0-255}}}` <br></br>
+
+## Flashing Firmware and Initial Configuration
+To install the firmware on your device and connect it to your home network, download the latest build [here](https://github.com/dwight9339/aquarium_light_led_controller/releases) and follow the instructions provided [here](https://tasmota.github.io/docs/Getting-Started/).
+
+## Integrating with your Smart Home System
+To integrate the light with your smart home system, you'll need to have an MQTT broker running and add the light as a client. The exact methods for doing so will depend on your specific system.
+![Screenshot of Home Assistant add-ons page with an arrow pointing to the Mosquitto Broker tile.](https://github.com/user-attachments/assets/c94a8e80-486c-42af-87aa-adb7eb8f27ce)
+![Screenshot of the Mostquitto MQTT broker configuration page with an arrow pointing to client credentials for the Tasmota device.](https://github.com/user-attachments/assets/d8e6db05-7a5b-4356-97e2-2a2acfdb1aee)
+
+You can then follow the instructions provided [here](https://tasmota.github.io/docs/MQTT/#configure-mqtt-using-webui) to configure MQTT on your device.
+![tasmota_mqtt_config](https://github.com/user-attachments/assets/8d867807-e168-4539-9161-3d3d9392623e)
+
+## Home Assistant MQTT Controller
+
+To implement a controller that can override the aquarium light in Home Assistant, you can add the following code to your `configuration.yaml` file. Make sure that you have the MQTT integration installed first:
+```
+mqtt:
+  - light:
+      schema: json
+      name: aquarium_light_override
+      command_topic: "cmnd/your_light/UpdateOverride"
+      state_topic: "stat/your_light/RESULT"
+      brightness: true
+      supported_color_modes: ["rgbw"]
+```
+
+Replace `your_light` with the actual topic used by your light.
+![aquarium_light_mqtt_topic](https://github.com/user-attachments/assets/d8832239-3033-4fbf-b2f8-093f7993543b)
 
 <hr></hr>
 <hr></hr>

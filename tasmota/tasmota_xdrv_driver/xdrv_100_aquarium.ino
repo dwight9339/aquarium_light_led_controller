@@ -13,24 +13,26 @@ const char CommandStrs[] PROGMEM = "|"  // No Prefix
   "UpdateSunsetTime|"
   "UpdatePeakBrightness|"
   "ToggleOverride|"
-  "UpdateOverrideColor";
+  "UpdateOverrideColor|"
+  "UpdateOverride";
 
 void (* const CommandFuncs[])(void) PROGMEM = {
   &CmdUpdateSunriseTime,
   &CmdUpdateSunsetTime,
   &CmdUpdatePeakBrightness,
   &CmdToggleOverride,
-  &CmdUpdateOverrideColor
+  &CmdUpdateOverrideColor,
+  &CmdUpdateOverride
 };
 
 void CmdUpdateSunriseTime(void) {
     uint8_t hour, minute;
-    if (sscanf(XdrvMailbox.data, "%hhu,%hhu", &hour, &minute) == 2) {
+    if (sscanf(XdrvMailbox.data, "%hhu:%hhu", &hour, &minute) == 2) {
         if (hour < 24 && minute < 60) {
             Settings->free_eb0.aquarium_light_settings.sunrise_hour = hour;
             Settings->free_eb0.aquarium_light_settings.sunrise_minute = minute;
             SettingsSave(0);
-            Response_P(PSTR("{\"%s\":\"Sunrise time updated to %02d:%02d\"}"), XdrvMailbox.command, hour, minute);
+            Response_P(PSTR("{\"sunrise_time\":\"%02d:%02d\"}"), hour, minute);
         } else {
             ResponseCmndChar(PSTR("Invalid sunrise time. Use: 0-23,0-59"));
         }
@@ -42,12 +44,12 @@ void CmdUpdateSunriseTime(void) {
 
 void CmdUpdateSunsetTime(void) {
     uint8_t hour, minute;
-    if (sscanf(XdrvMailbox.data, "%hhu,%hhu", &hour, &minute) == 2) {
+    if (sscanf(XdrvMailbox.data, "%hhu:%hhu", &hour, &minute) == 2) {
         if (hour < 24 && minute < 60) {
             Settings->free_eb0.aquarium_light_settings.sunset_hour = hour;
             Settings->free_eb0.aquarium_light_settings.sunset_minute = minute;
             SettingsSave(0);
-            Response_P(PSTR("{\"%s\":\"Sunset time updated to %02d:%02d\"}"), XdrvMailbox.command, hour, minute);
+            Response_P(PSTR("{\"sunset_time\":\"%02d:%02d\"}"), hour, minute);
         } else {
             ResponseCmndChar(PSTR("Invalid sunset time. Use: 0-23,0-59"));
         }
@@ -65,7 +67,7 @@ void CmdUpdatePeakBrightness(void) {
             Settings->free_eb0.aquarium_light_settings.peak_brightness_color[2] = b;
             Settings->free_eb0.aquarium_light_settings.peak_brightness_color[3] = w;
             SettingsSave(0);
-            Response_P(PSTR("{\"%s\":\"Peak brightnes color updated to RGBW(%d,%d,%d,%d)\"}"), XdrvMailbox.command, r, g, b, w);
+            Response_P(PSTR("{\"color\": \"%d,%d,%d,%d\"}"), r, g, b, w);
         } else {
             ResponseCmndChar(PSTR("Invalid color values. Use: 0-255 for each channel."));
         }
@@ -75,15 +77,11 @@ void CmdUpdatePeakBrightness(void) {
 }
 
 void CmdToggleOverride(void) {
-  if (Settings == NULL) {
-    ResponseCmndChar(PSTR("Error: Settings pointer is NULL."));
-    return;
-  }
+  uint8_t override_status = Settings->free_eb0.aquarium_light_settings.override_enabled;
+  Settings->free_eb0.aquarium_light_settings.override_enabled = !override_status;
 
-  uint8_t current_override_status = Settings->free_eb0.aquarium_light_settings.override_enabled;
-  Settings->free_eb0.aquarium_light_settings.override_enabled = !current_override_status;
-  SettingsSave(0);
-  Response_P(PSTR("{\"Command\":\"ToggleOverride\",\"Status\":%d}"), Settings->free_eb0.aquarium_light_settings.override_enabled);
+  Response_P(PSTR("{\"state\":\"%s\"}"),
+    Settings->free_eb0.aquarium_light_settings.override_enabled ? "ON" : "OFF");
 }
 
 void CmdUpdateOverrideColor(void) {
@@ -95,13 +93,61 @@ void CmdUpdateOverrideColor(void) {
             Settings->free_eb0.aquarium_light_settings.override_color[2] = b;
             Settings->free_eb0.aquarium_light_settings.override_color[3] = w;
             SettingsSave(0);
-            Response_P(PSTR("{\"%s\":\"Override color updated: RGBW(%d,%d,%d,%d)\"}"), XdrvMailbox.command, r, g, b, w);
+            Response_P(PSTR("{\"color\": %d,%d,%d,%d}"), r, g, b, w);
         } else {
             ResponseCmndChar(PSTR("Invalid input. RGBW: 0-255 each."));
         }
     } else {
         ResponseCmndChar(PSTR("Syntax: UpdateOverrideColor <R>,<G>,<B>,<W>"));
     }
+}
+
+void CmdUpdateOverride(void) {
+    JsonParser parser((char*) XdrvMailbox.data);
+    JsonParserObject root = parser.getRootObject();
+    if (!root) {
+        AddLog(LOG_LEVEL_ERROR, PSTR("JSON Parse Error"));
+        return;
+    }
+
+    JsonParserToken state = root[PSTR("state")];
+    if (state) {
+        const char* state_val = state.getStr();
+        if (strcmp(state_val, "ON") == 0) {
+            Settings->free_eb0.aquarium_light_settings.override_enabled = 1;
+        } else if (strcmp(state_val, "OFF") == 0) {
+            Settings->free_eb0.aquarium_light_settings.override_enabled = 0;
+        } else {
+            AddLog(LOG_LEVEL_ERROR, PSTR("Invalid state value: %s"), state_val);
+            return;
+        }
+    }
+
+    JsonParserObject color = root[PSTR("color")];
+    if (color) {
+        uint8_t r = color[PSTR("r")].getUInt();
+        uint8_t g = color[PSTR("g")].getUInt();
+        uint8_t b = color[PSTR("b")].getUInt();
+        uint8_t w = color[PSTR("w")].getUInt();
+
+        if (r <= 255 && g <= 255 && b <= 255 && w <= 255) {
+            Settings->free_eb0.aquarium_light_settings.override_color[0] = r;
+            Settings->free_eb0.aquarium_light_settings.override_color[1] = g;
+            Settings->free_eb0.aquarium_light_settings.override_color[2] = b;
+            Settings->free_eb0.aquarium_light_settings.override_color[3] = w;
+            AddLog(LOG_LEVEL_INFO, PSTR("Override color updated: R=%u, G=%u, B=%u, W=%u"), r, g, b, w);
+        } else {
+            AddLog(LOG_LEVEL_ERROR, PSTR("Invalid color values: R=%u, G=%u, B=%u, W=%u"), r, g, b, w);
+        }
+    }
+    const char* override_state =  Settings->free_eb0.aquarium_light_settings.override_enabled ? "ON" : "OFF";
+    Response_P(PSTR("{\"state\":\"%s\",\"color\":{\"r\":%d,\"g\":%d,\"b\":%d,\"w\":%d}}"),
+      override_state,
+      Settings->free_eb0.aquarium_light_settings.override_color[0],
+      Settings->free_eb0.aquarium_light_settings.override_color[1],
+      Settings->free_eb0.aquarium_light_settings.override_color[2],
+      Settings->free_eb0.aquarium_light_settings.override_color[3]
+    );
 }
 
 /*********************************************************************************************\

@@ -1,7 +1,7 @@
 # This repo implements custom functionality on top of
 ![Tasmota logo](/tools/logo/TASMOTA_FullLogo_Vector.svg#gh-light-mode-only)![Tasmota logo](/tools/logo/TASMOTA_FullLogo_Vector_White.svg#gh-dark-mode-only)
 <hr></hr>
-These are select excerpts from the full Tasmota ReadMe document. The full thing can be found (here)[https://github.com/arendst/Tasmota/blob/development/README.md].
+These are select excerpts from the full Tasmota ReadMe document. The full thing can be found [here](https://github.com/arendst/Tasmota/blob/development/README.md).
 ## Easy install
 
 Easy initial installation of Tasmota can be performed using the [Tasmota WebInstaller](https://tasmota.github.io/install/).

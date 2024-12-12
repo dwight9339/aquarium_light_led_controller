@@ -1,9 +1,18 @@
-# This repo implements custom functionality on top of
+# This firmware is built on
 ![Tasmota logo](/tools/logo/TASMOTA_FullLogo_Vector.svg#gh-light-mode-only)![Tasmota logo](/tools/logo/TASMOTA_FullLogo_Vector_White.svg#gh-dark-mode-only)
 
+# Aquarium LED Controller
+The project implements a custom driver for Tasmota and turns an ESP8266-based device into a controller for RGBW LED strips. The custom functionality is fairly simple, implementing only two main features:
+- **Onboard Brightness Ramping**: Brightness smoothly ramps from 0 to a specified full brightness value for each RGBW channel and back down to 0 over the course of a day between specified sunrise and sunset times following a sine-squared function. Implementing brightness ramping directly on the controller makes it more robust against wireless connectivity issues associated with controlling the light via a central home automation server and relieves such a server from having to execute updates at the rates required to produce a smooth lighting curve.
+- **Override of Default Functionality**: The ramping functionality described previously is the default for the device but can be overridden if desired.
+
+
+
+<hr></hr>
+<hr></hr>
 <hr></hr>
 
-The following are select excerpts from the full Tasmota ReadMe document. The full thing can be found [here](https://github.com/arendst/Tasmota/blob/development/README.md).
+The following are select excerpts from the Tasmota ReadMe document. The full thing can be found [here](https://github.com/arendst/Tasmota/blob/development/README.md).
 
 <hr></hr>
 

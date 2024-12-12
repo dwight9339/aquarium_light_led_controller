@@ -4,7 +4,7 @@
 # Aquarium LED Controller
 The project implements a custom driver for Tasmota that turns an ESP8266-based device into an aquarium light controller for RGBW LED strips. The custom functionality is fairly simple, implementing only two main features:
 - **Onboard Brightness Ramping**: Brightness smoothly ramps from 0 to a specified full brightness value for each RGBW channel and back down to 0 over the course of a day between specified sunrise and sunset times following a sine-squared function. Implementing brightness ramping directly on the controller makes it more robust against wireless connectivity issues associated with controlling the light via a central home automation server and relieves such a server from having to execute updates at the rates required to produce a smooth lighting curve.
-- **Override of Default Functionality**: The ramping functionality described previously is the default for the device but can be overridden if desired.
+- **Override of Default Functionality**: The ramping functionality described previously is the default for the device but can be overridden, if desired, to make the light essentially just a normal LED smart light.
 
 ## Custom Commands
 The following commands can be executed either in the Tasmota web console or via MQTT to update lighting parameters:

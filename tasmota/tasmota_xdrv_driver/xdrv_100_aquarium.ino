@@ -162,9 +162,9 @@ void AquariumInit() {
 
 uint32_t GetMillisecondsSinceMidnight() {
     uint32_t current_millis = millis() % 1000;
-    uint32_t milliseconds = ((RtcTime.hour * 3600UL) + (RtcTime.minute * 60) + RtcTime.second) * 1000;
-    milliseconds += current_millis; 
-    return milliseconds;
+    uint32_t ms = ((RtcTime.hour * 3600UL) + (RtcTime.minute * 60) + RtcTime.second) * 1000;
+    ms += current_millis; 
+    return ms;
 }
 
 static uint8_t prev_channels[5] = {0, 0, 0, 0, 0};

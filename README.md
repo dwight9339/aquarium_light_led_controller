@@ -26,8 +26,8 @@ To integrate the light with your smart home system, you'll need to have an MQTT 
 You can then follow the instructions provided [here](https://tasmota.github.io/docs/MQTT/#configure-mqtt-using-webui) to configure MQTT on your device.
 ![Screenshot of Tasmota MQTT config form with example data.](https://github.com/user-attachments/assets/8d867807-e168-4539-9161-3d3d9392623e)
 
-## Home Assistant MQTT Controller
-To implement a controller that can override the aquarium light in Home Assistant, you can add the following code to your `configuration.yaml` file. Make sure that you have the MQTT integration installed first:
+## Home Assistant Override Entity Controller
+To implement an entity that can override the aquarium light in Home Assistant, make sure that you have set the light up as an MQTT client as described in the previous sections then add the following code to your `configuration.yaml` file:
 ```
 mqtt:
   - light:
@@ -38,10 +38,15 @@ mqtt:
       brightness: true
       supported_color_modes: ["rgbw"]
 ```
-This creates a light entity which can be used to toggle override mode on and off and update the override color of the light.
+This creates a light entity which can be used to toggle override mode on and off and update the override color of the light. Unfortunately, the entity does not support setting the brightness of all four (R, G, B, and W) channels. Adjusting the brightness of the white channel will turn off the RGB channels and adjusting the brightness for the color channels will turn off the white channel. However, it is still very useful if you want to experiment with different colors or incorporate the light into any scenes.
 ![override_entity](https://github.com/user-attachments/assets/aba7593c-be62-4211-a7ec-e97cc807fe12)
 Make sure to replace `your_light_topic` with the actual topic used by your light.
 ![Screenshot of Tasmota web console output with device's topic underlined.](https://github.com/user-attachments/assets/984ee050-8e99-4e7f-9f2d-d0e5271aa2d6)
+
+## Contributing
+If you'd like to contribute to the project, go ahead and fork the repo and create a pull request! The repo uses the entire sprawling Tasmota codebase but the only files relevant to this project in particular are:
+- `tasmota/include/tasmota_types.h`: Where all Tasmota settings are declared. The `AquariumLightSettings` struct with the settings used by the custom driver is declared on line 487.
+- `tasmota/tasmota_xdrv_driver/xdrv_100_aquarium.ino`: The custom driver file. All of the custom logic which controls the light and implements the commands to update the relevant settings is housed here.
 
 <hr></hr>
 <hr></hr>

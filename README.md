@@ -27,7 +27,6 @@ You can then follow the instructions provided [here](https://tasmota.github.io/d
 ![Screenshot of Tasmota MQTT config form with example data.](https://github.com/user-attachments/assets/8d867807-e168-4539-9161-3d3d9392623e)
 
 ## Home Assistant MQTT Controller
-
 To implement a controller that can override the aquarium light in Home Assistant, you can add the following code to your `configuration.yaml` file. Make sure that you have the MQTT integration installed first:
 ```
 mqtt:
@@ -39,8 +38,9 @@ mqtt:
       brightness: true
       supported_color_modes: ["rgbw"]
 ```
-
-Replace `your_light_topic` with the actual topic used by your light.
+This creates a light entity which can be used to toggle override mode on and off and update the override color of the light.
+![override_entity](https://github.com/user-attachments/assets/aba7593c-be62-4211-a7ec-e97cc807fe12)
+Make sure to replace `your_light_topic` with the actual topic used by your light.
 ![Screenshot of Tasmota web console output with device's topic underlined.](https://github.com/user-attachments/assets/984ee050-8e99-4e7f-9f2d-d0e5271aa2d6)
 
 <hr></hr>

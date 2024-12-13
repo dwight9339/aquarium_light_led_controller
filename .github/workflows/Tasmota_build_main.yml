@@ -1,4 +1,4 @@
-name: Build_firmware_master
+name: Build_firmware_main
 
 on:
   workflow_dispatch:      # Start a workflow

@@ -1,17 +1,57 @@
+# This firmware is built on
 ![Tasmota logo](/tools/logo/TASMOTA_FullLogo_Vector.svg#gh-light-mode-only)![Tasmota logo](/tools/logo/TASMOTA_FullLogo_Vector_White.svg#gh-dark-mode-only)
 
-Alternative firmware for [ESP8266](https://en.wikipedia.org/wiki/ESP8266) and [ESP32](https://en.wikipedia.org/wiki/ESP32) based devices with **easy configuration using webUI, OTA updates, automation using timers or rules, expandability and entirely local control over MQTT, HTTP, Serial or KNX**.
-_Written for PlatformIO._
+# Aquarium LED Controller
+The project implements a custom driver for Tasmota that turns an ESP8266-based device into an aquarium light controller for RGBW LED strips. The custom functionality is fairly simple, implementing only two main features:
+- **Onboard Brightness Ramping**: Brightness smoothly ramps from 0 to a specified full brightness value for each RGBW channel and back down to 0 over the course of a day between specified sunrise and sunset times following a sine-squared function. Implementing brightness ramping directly on the controller makes it more robust against wireless connectivity issues associated with controlling the light via a central home automation server and relieves such a server from having to execute updates at the rates required to produce a smooth lighting curve.
+- **Override of Default Functionality**: The ramping functionality described previously is the default for the device but can be overridden, if desired, to make the light essentially just a normal LED smart light.
 
-[![GitHub version](https://img.shields.io/github/release/arendst/Tasmota.svg)](http://ota.tasmota.com/tasmota/release)
-[![GitHub download](https://img.shields.io/github/downloads/arendst/Tasmota/total.svg)](https://github.com/arendst/Tasmota/releases/latest)
-[![License](https://img.shields.io/github/license/arendst/Tasmota.svg)](LICENSE.txt)
-[![Discord](https://img.shields.io/discord/479389167382691863.svg?logo=discord&logoColor=white&color=5865F2&label=Discord)](https://discord.gg/Ks2Kzd4)
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/arendst/Tasmota)
+## Custom Commands
+The following commands can be executed either in the Tasmota web console or via MQTT to update lighting parameters:
+- `UpdateSunriseTime {hh}:{mm}`: Sets the `sunrise_hour` and `sunrise_minute` parameters to hour (`hh`) and minute (`mm`) respectively.
+- `UpdateSunsetTime {hh}:{mm}`: Sets the `sunset_hour` and `ssunset_minute` parameters to hour (`hh`) and minute (`mm`) respectively.
+- `UpdatePeakBrightness {r},{g},{b},{w}`: Sets the maximum brightness (0-255) reached by each of the light channels (R, G, B, and W(cold white or warm white depending on your LED strip)).
+- `ToggleOverride`: Toggles the parameter which determines whether or not the default functionality is overridden.
+- `UpdateOverrideColor {r},{g},{b},{w}`: Sets the brightness (0-255) for each channel when the default functionality is overridden.
+- `UpdateOverride`: Mainly used when implementing MQTT-based controls in smart home systems like Home Assistant. Updates the override parameters (on-off and channel brightnesses) but expects a JSON object of the form: <br></br> `{"status": "ON|OFF", "color": {"r":{0-255}, "g": {0-255}, "b": {0-255}, "w": {0-255}}}` <br></br>
+
+## Flashing Firmware and Initial Configuration
+To install the firmware on your device and connect it to your home network, download the latest build [here](https://github.com/dwight9339/aquarium_light_led_controller/releases) and follow the instructions provided [here](https://tasmota.github.io/docs/Getting-Started/).
+
+## Integrating with your Smart Home System
+To integrate the light with your smart home system, you'll need to have an MQTT broker running and add the light as a client. The exact methods for doing so will depend on your specific system. For example, here is my Mosquitto broker configuration for Home Assistant.
+![Screenshot of Home Assistant add-ons page with an arrow pointing to the Mosquitto Broker tile.](https://github.com/user-attachments/assets/d68be58b-328d-40b1-980d-a2a4f4c0e39b)
+![Screenshot of the Mostquitto MQTT broker configuration page with an arrow pointing to client credentials for the Tasmota device.](https://github.com/user-attachments/assets/d8e6db05-7a5b-4356-97e2-2a2acfdb1aee)
+
+You can then follow the instructions provided [here](https://tasmota.github.io/docs/MQTT/#configure-mqtt-using-webui) to configure MQTT on your device.
+![Screenshot of Tasmota MQTT config form with example data.](https://github.com/user-attachments/assets/8d867807-e168-4539-9161-3d3d9392623e)
+
+## Home Assistant Override Entity Controller
+To implement an entity that can override the aquarium light in Home Assistant, make sure that you have set the light up as an MQTT client as described in the previous sections then add the following code to your `configuration.yaml` file:
+```
+mqtt:
+  - light:
+      schema: json
+      name: aquarium_light_override
+      command_topic: "cmnd/your_light_topic/UpdateOverride"
+      state_topic: "stat/your_light_topic/RESULT"
+      brightness: true
+      supported_color_modes: ["rgbw"]
+```
+This creates a light entity which can be used to toggle override mode on and off and update the override color of the light. Unfortunately, the entity does not support setting the brightness of all four (R, G, B, and W) channels. Adjusting the brightness of the white channel will turn off the RGB channels and adjusting the brightness for the color channels will turn off the white channel. However, it is still very useful if you want to experiment with different colors or incorporate the light into any scenes.
+![override_entity](https://github.com/user-attachments/assets/aba7593c-be62-4211-a7ec-e97cc807fe12)
+Make sure to replace `your_light_topic` with the actual topic used by your light.
+![Screenshot of Tasmota web console output with device's topic underlined.](https://github.com/user-attachments/assets/984ee050-8e99-4e7f-9f2d-d0e5271aa2d6)
+
+## Contributing
+If you'd like to contribute to the project, go ahead and fork the repo and create a pull request! The repo uses the entire sprawling Tasmota codebase but the only files relevant to this project in particular are:
+- `tasmota/include/tasmota_types.h`: Where all Tasmota settings are declared. The `AquariumLightSettings` struct with the settings used by the custom driver is declared on line 487.
+- `tasmota/tasmota_xdrv_driver/xdrv_100_aquarium.ino`: The custom driver file. All of the custom logic which controls the light and implements the commands to update the relevant settings is housed here.
 
 <hr></hr>
+<hr></hr>
 
-**In light of current events we like to support the people behind _PlatformIO Project_, especially Ivan Kravets, and wish them the strength to help stop the war. See [platformio-is-ukrainian-project-please-help-us-stop-the-war](https://community.platformio.org/t/platformio-is-ukrainian-project-please-help-us-stop-the-war/26330) for what you can do.**
+The following are select excerpts from the Tasmota ReadMe document. The full thing can be found [here](https://github.com/arendst/Tasmota/blob/development/README.md).
 
 <hr></hr>
 
@@ -29,21 +69,6 @@ See [RELEASENOTES.md](https://github.com/arendst/Tasmota/blob/master/RELEASENOTE
 
 Firmware binaries can be downloaded from http://ota.tasmota.com/tasmota/release/ or http://ota.tasmota.com/tasmota32/release/ for ESP32 binaries.
 
-## Development
-
-[![Dev Version](https://img.shields.io/badge/development%20version-v14.3.x.x-blue.svg)](https://github.com/arendst/Tasmota)
-[![Download Dev](https://img.shields.io/badge/download-development-yellow.svg)](http://ota.tasmota.com/tasmota/)
-[![Tasmota CI](https://github.com/arendst/Tasmota/actions/workflows/build_all_the_things.yml/badge.svg)](https://github.com/arendst/Tasmota/actions/workflows/build_all_the_things.yml)
-[![Build_development](https://github.com/arendst/Tasmota/actions/workflows/Tasmota_build_devel.yml/badge.svg)](https://github.com/arendst/Tasmota/actions/workflows/Tasmota_build_devel.yml)
-
-See [CHANGELOG.md](CHANGELOG.md) for detailed change information.
-
-Unless your Tasmota powered device exhibits a problem or lacks a feature that you need, leave your device alone - it works so don’t make unnecessary changes! If the release version (i.e., the master branch) exhibits unexpected behaviour for your device and configuration, you should upgrade to the latest development version instead to see if your problem is resolved as some bugs in previous releases or development builds may already have been resolved.
-
-Every commit made to the development branch, which is compiling successfully, will post new binary files at http://ota.tasmota.com/tasmota/ (this web address can be used for OTA updates too). It is important to note that these binaries are based on the current development codebase. These commits are tested as much as is possible and are typically quite stable. However, it is infeasible to test on the hundreds of different types of devices with all the available configuration options permitted.
-
-Note that there is a chance, as with any upgrade, that the device may not function as expected. You must always account for the possibility that you may need to flash the device via the serial programming interface if the OTA upgrade fails. Even with the master release, you should always attempt to test the device or a similar prototype before upgrading a device which is in production or is hard to reach. And, as always, make a backup of the device configuration before beginning any firmware update.
-
 ## Disclaimer
 
 :warning: **DANGER OF ELECTROCUTION** :warning:
@@ -56,9 +81,6 @@ We don't take any responsibility nor liability for using this software nor for t
 
 Please do not ask to add new devices unless it requires additional code for new features. If the device is not listed as a module, try using [Templates](https://tasmota.github.io/docs/Templates) first. If it is not listed in the [Tasmota Device Templates Repository](http://templates.blakadder.com) create your own [Template](https://tasmota.github.io/docs/Templates#creating-your-template).
 
-## Quick Install
-Download one of the released binaries from http://ota.tasmota.com/tasmota/release/ or http://ota.tasmota.com/tasmota32/release/ and flash it to your hardware [using our installation guide](https://tasmota.github.io/docs/Getting-Started).
-
 ## Important User Compilation Information
 If you want to compile Tasmota yourself keep in mind the following:
 
@@ -69,39 +91,6 @@ If you want to compile Tasmota yourself keep in mind the following:
 ## Configuration Information
 
 Please refer to the installation and configuration articles in our [documentation](https://tasmota.github.io/docs).
-
-## Migration Information
-
-See [migration path](https://tasmota.github.io/docs/Upgrading#migration-path) for instructions how to migrate to a major version.
-
-**Do not upgrade from minimal to minimal version. It will most likely fail at some point and will require flashing via serial.** If you do have to use minimal versions, always OTA to a full version of the same release before applying next minimal version.
-
-Pay attention to the following version breaks due to dynamic settings updates:
-
-1. Migrate to **Sonoff-Tasmota 3.9.x**
-2. Migrate to **Sonoff-Tasmota 4.x**
-3. Migrate to **Sonoff-Tasmota 5.14**
-4. Migrate to **Sonoff-Tasmota 6.7.1** (http://ota.tasmota.com/tasmota/release_6.7.1/sonoff.bin) - NOTICE underscore as a dash is not supported in older versions
-5. Migrate to **Tasmota 7.2.0** (http://ota.tasmota.com/tasmota/release-7.2.0/tasmota.bin)
-
---- Major change in parameter storage layout ---
-
-6. Migrate to **Tasmota 8.5.1** (http://ota.tasmota.com/tasmota/release-8.5.1/tasmota.bin)
-
---- Major change in internal GPIO function representation ---
-
-7. Migrate to **Tasmota 9.1** (http://ota.tasmota.com/tasmota/release-9.1.0/tasmota.bin.gz)
-8. Upgrade to **latest release** (http://ota.tasmota.com/tasmota/release/tasmota.bin.gz)
-
-While fallback or downgrading is common practice it was never supported due to Settings additions or changes in newer releases. Starting with release **v9.1.0 Imogen** the internal GPIO function representation has changed in such a way that fallback is only possible to the latest GPIO configuration before installing **v9.1.0**.
-
-## Support Information
-
-<img src="https://user-images.githubusercontent.com/5904370/68332933-e6e5a600-00d7-11ea-885d-50395f7239a1.png" width=150 align="right" />
-
-For a database of supported devices see [Tasmota Device Templates Repository](https://templates.blakadder.com)
-
-If you're looking for support on **Tasmota** there are some options available:
 
 ### Documentation
 
@@ -115,58 +104,6 @@ If you're looking for support on **Tasmota** there are some options available:
 * [Tasmota Users Chat](https://discord.gg/Ks2Kzd4): For support, troubleshooting and general questions. You have better chances to get fast answers from members of the Tasmota Community.
 * [Search in Issues](https://github.com/arendst/Tasmota/issues): You might find an answer to your question by searching current or closed issues.
 * [Software Problem Report](https://github.com/arendst/Tasmota/issues/new?template=Bug_report.md): For reporting problems of Tasmota Software.
-
-## Contribute
-
-You can contribute to Tasmota by
-- Providing Pull Requests (Features, Proof of Concepts, Language files or Fixes)
-- Testing new released features and report issues
-- Donating to acquire hardware for testing and implementing or out of gratitude
-- Contributing missing [documentation](https://tasmota.github.io/docs) for features and devices
-
-[![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://paypal.me/tasmota)
-
-## Credits
-
-People helping to keep the show on the road:
-- Sfromis providing extensive user support
-- Barbudor providing user support and code fixes and additions
-- David Lang providing initial issue resolution and code optimizations
-- Heiko Krupp for his IRSend, HTU21, SI70xx and Wemo/Hue emulation drivers
-- Wiktor Schmidt for Travis CI implementation
-- Thom Dietrich for PlatformIO optimizations
-- Marinus van den Broek for his EspEasy groundwork
-- Pete Ba for more user friendly energy monitor calibration
-- Lobradov providing compile optimization tips
-- Flexiti for his initial timer implementation
-- reloxx13 for his [TasmoAdmin](https://github.com/reloxx13/TasmoAdmin) management tool
-- Joachim Banzhaf for his TSL2561 library and driver
-- Andre Thomas for providing many drivers
-- Gijs Noorlander for his MHZ19, SenseAir and updated PubSubClient drivers
-- Erik Montnemery for his HomeAssistant Discovery concept and many code tuning tips
-- Federico Leoni for continued HomeAssistant Discovery support
-- Aidan Mountford for his HSB support
-- Daniel Ztolnai for his Serial Bridge implementation
-- Gerhard Mutz for multiple sensor & display drivers, Sunrise/Sunset, and scripting
-- Nuno Ferreira for his HC-SR04 driver
-- Adrian Scillato for his (security)fixes and implementing and maintaining KNX
-- Gennaro Tortone for implementing and maintaining Eastron drivers
-- Raymond Mouthaan for managing Wemos Wiki information
-- Norbert Richter for his [decode-config.py](https://github.com/tasmota/decode-config) tool
-- Joel Stein, digiblur and Shantur Rathore for their Tuya research and driver
-- Frogmore42 for providing many issue answers
-- Jason2866 for platformio support and providing many issue answers
-- Blakadder for managing the document site and providing template management
-- Stephan Hadinger for refactoring light driver, enhancing HueEmulation, LVGL, Zigbee and Berry support
-- tmo for designing the official Tasmota logo
-- Stefan Bode for his Shutter and Deep sleep drivers
-- Jacek Ziółkowski for his [TDM](https://github.com/jziolkowski/tdm) management tool and [Tasmotizer](https://github.com/tasmota/tasmotizer) flashing tool
-- Christian Staars for NRF24L01 and HM-10 Bluetooth sensor support
-- Paul Diem for UDP Group communication support
-- Jörg Schüler-Maroldt for his initial ESP32 port
-- Javier Arigita for his thermostat driver
-- Simon Hailes for ESP32 Bluetooth extensions
-- Many more providing Tips, Wips, Pocs, PRs and Donations
 
 ## License
 

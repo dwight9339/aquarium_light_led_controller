@@ -1,9 +1,9 @@
-name: Build_firmware_master
+name: Build_firmware_main
 
 on:
   workflow_dispatch:      # Start a workflow
   push:
-    branches: master
+    branches: main
     paths-ignore:
     - '.github/**'        # Ignore changes towards the .github directory
     - '**.md'             # Do no build if *.md files changes
@@ -65,14 +65,14 @@ jobs:
         variant:
           - tasmota
           - tasmota-4M
-          - tasmota-minimal
-          - tasmota-display
-          - tasmota-ir
-          - tasmota-knx
-          - tasmota-lite
-          - tasmota-sensors
-          - tasmota-zbbridge
-          - tasmota-zigbee
+          # - tasmota-minimal
+          # - tasmota-display
+          # - tasmota-ir
+          # - tasmota-knx
+          # - tasmota-lite
+          # - tasmota-sensors
+          # - tasmota-zbbridge
+          # - tasmota-zigbee
     steps:
       - uses: actions/checkout@v4
         with:
@@ -106,20 +106,20 @@ jobs:
       matrix:
         variant:
           - tasmota32
-          - tasmota32-zbbrdgpro
-          - tasmota32-webcam
-          - tasmota32-bluetooth
-          - tasmota32-nspanel
-          - tasmota32-display
-          - tasmota32-ir
-          - tasmota32-lvgl
-          - tasmota32c2
-          - tasmota32c3
-          - tasmota32c6
-          - tasmota32s2
-          - tasmota32s2cdc
-          - tasmota32s3
-          - tasmota32solo1
+          # - tasmota32-zbbrdgpro
+          # - tasmota32-webcam
+          # - tasmota32-bluetooth
+          # - tasmota32-nspanel
+          # - tasmota32-display
+          # - tasmota32-ir
+          # - tasmota32-lvgl
+          # - tasmota32c2
+          # - tasmota32c3
+          # - tasmota32c6
+          # - tasmota32s2
+          # - tasmota32s2cdc
+          # - tasmota32s3
+          # - tasmota32solo1
     steps:
       - uses: actions/checkout@v4
         with:
@@ -213,6 +213,12 @@ jobs:
       run: ls -R ./mv_firmware/
     - name: Zip all map.gz files in one file -> map_all.zip
       run: 7z a -mx=9 -tzip -xr'!.*' map_all.zip mv_firmware/map
+    - name: Rename firmware binaries to use "tasmota_aquarium_light"
+      run: |
+        for binfile in $(find ./mv_firmware/firmware -type f -name "*.bin"); do
+          newfile="$(echo "$binfile" | sed 's/tasmota/tasmota_aquarium_light/g')"
+          mv "$binfile" "$newfile"
+        done
     - name: Release
       uses: jason2866/action-gh-release@v1.2
       #if: startsWith(github.ref, 'refs/tags/')
@@ -224,13 +230,13 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  Start_final_copy:
-    needs: Release
-    runs-on: ubuntu-latest
-    steps:
-    - name: Dispatch workflow in arendst/Tasmota-firmware
-      run: |
-         curl -X POST https://api.github.com/repos/arendst/Tasmota-firmware/actions/workflows/fetch_deploy.yml/dispatches \
-         -H 'Accept: application/vnd.github.everest-preview+json' \
-         -u ${{ secrets.API_TOKEN_GITHUB }} \
-         --data '{"ref": "gh_actions"}'
+  # Start_final_copy:
+  #   needs: Release
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Dispatch workflow in arendst/Tasmota-firmware
+  #     run: |
+  #        curl -X POST https://api.github.com/repos/arendst/Tasmota-firmware/actions/workflows/fetch_deploy.yml/dispatches \
+  #        -H 'Accept: application/vnd.github.everest-preview+json' \
+  #        -u ${{ secrets.API_TOKEN_GITHUB }} \
+  #        --data '{"ref": "gh_actions"}'

@@ -16,7 +16,7 @@ concurrency:
 jobs:
   safeboot-images:
     runs-on: ubuntu-latest
-    if: github.repository == 'arendst/Tasmota'
+    if: github.repository == 'dwight9339/aquarium_light_led_controller'
     continue-on-error: true
     strategy:
       matrix:
@@ -58,7 +58,7 @@ jobs:
 
   base-images:
     runs-on: ubuntu-latest
-    if: github.repository == 'arendst/Tasmota'
+    if: github.repository == 'dwight9339/aquarium_light_led_controller'
     continue-on-error: true
     strategy:
       matrix:
@@ -100,7 +100,7 @@ jobs:
   base32-images:
     needs: safeboot-images
     runs-on: ubuntu-latest
-    if: github.repository == 'arendst/Tasmota'
+    if: github.repository == 'dwight9339/aquarium_light_led_controller'
     continue-on-error: true
     strategy:
       matrix:
@@ -155,7 +155,7 @@ jobs:
   language-images:
     needs: safeboot-images
     runs-on: ubuntu-latest
-    if: github.repository == 'arendst/Tasmota'
+    if: github.repository == 'dwight9339/aquarium_light_led_controller'
     continue-on-error: true
     strategy:
       matrix:

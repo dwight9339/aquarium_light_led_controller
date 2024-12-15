@@ -1,4 +1,6 @@
 #ifdef USE_AQUARIUM_LIGHTING
+#ifdef USE_LIGHT
+
 #define XDRV_100 100
 #include "include/tasmota_types.h"  // Access to TSettings and AquariumLightSettings
 #include <math.h>                   // For sine functions
@@ -254,4 +256,5 @@ bool Xdrv100(uint32_t function) {
 
   return result;
 }
+#endif
 #endif  // USE_AQUARIUM_LIGHTING

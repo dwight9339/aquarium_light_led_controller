@@ -22,7 +22,7 @@ The following commands can be executed either in the Tasmota web console or via 
 
 ## Ramp Shape Playground
 I've created interactive graphs for each of the available ramp shapes to help dial in the best lighting schedule.
-![ramp_shape_playground_screenshot](https://github.com/user-attachments/assets/42abe918-a608-4242-a14e-d5ed3fd3439f)
+![ramp_shape_playground_screenshot(1)](https://github.com/user-attachments/assets/3ca96f93-9ad0-457e-9949-47ad255f9460)
 
 ## Flashing Firmware and Initial Configuration
 To install the firmware on your device and connect it to your home network, download the latest build [here](https://github.com/dwight9339/aquarium_light_led_controller/releases) and follow the instructions provided [here](https://tasmota.github.io/docs/Getting-Started/).

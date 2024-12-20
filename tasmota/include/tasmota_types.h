@@ -487,15 +487,15 @@ typedef union {
 typedef struct {
   uint8_t sunrise_hour;             // Hour of sunrise (0-23)
   uint8_t sunrise_minute;           // Minute of sunrise (0-59)
+  uint8_t ramp_shape;               // 0 = Sine, 1 = S-curve, 2 = linear
+  uint8_t update_frequency;         // 0 = every second, 1 = every 250 ms, 2 = every 100 ms, 3 = every 50 ms
+  uint8_t override_enabled;         // 0 = normal operation, 1 = override active
+  uint8_t reserved[3];              // Keep remaining bytes for future expansion
   uint8_t peak_brightness_color[4]; // RGBW color at peak brightness
-  uint8_t ramp_shape;               // 0 = Sine, 1 = S-curve, 2 = Smoothstep, 3 = Smootherstep, 4 = linear
+  uint8_t override_color[4];        // RGBW color to use when override is enabled
   uint16_t steepness;               // Steepness parameter for relevant ramp shapes, scaled by 1000
   uint16_t ramp_time;               // Time required to complete a ramp, in minutes
   uint16_t peak_hold_time;          // Time spent at peak brightness value, in minutes
-  uint8_t override_enabled;         // 0 = normal operation, 1 = override active
-  uint8_t override_color[4];        // RGBW color to use when override is enabled
-  uint8_t update_frequency;         // 0 = every second, 1 = every 250 ms, 2 = every 100 ms, 3 = every 50 ms
-  uint8_t reserved[3];              // Keep remaining bytes for future expansion
 } AquariumLightSettings;
 
 const uint32_t settings_text_size = 699;   // Settings->text_pool[size] = Settings->display_model (2D2) - Settings->text_pool (017)

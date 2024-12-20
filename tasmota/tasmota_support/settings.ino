@@ -1444,7 +1444,7 @@ void SettingsDefaultSet2(void) {
   Settings->free_eb0.aquarium_light_settings.peak_brightness_color[2] = 255; // B
   Settings->free_eb0.aquarium_light_settings.peak_brightness_color[3] = 255; // W
   Settings->free_eb0.aquarium_light_settings.ramp_shape = 0;                 // Sine
-  Settings->free_eb0.aquarium_light_settings.steepness = 2;
+  Settings->free_eb0.aquarium_light_settings.steepness = 2000;               // 2.0
   Settings->free_eb0.aquarium_light_settings.ramp_time = 300;                // 5 hours
   Settings->free_eb0.aquarium_light_settings.peak_hold_time = 0;
   Settings->free_eb0.aquarium_light_settings.update_frequency = 1;           // Every 250 ms

@@ -73,6 +73,7 @@
     ],
     "files.associations": {
       "array": "cpp",
-      "string": "cpp"
+      "string": "cpp",
+      "cmath": "cpp"
     }
   }

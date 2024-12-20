@@ -21,7 +21,7 @@ The following commands can be executed either in the Tasmota web console or via 
 - `UpdateUpdateFrequency {0-3}`: Adjusts the light update frequency setting. Changing this is not advised. The default setting (every 250 seconds) currently provides the best results in transition smoothing tests. 0 = every second, 1 = every 250 milliseconds, 2 = every 100 milliseconds, 3 = every 50 milliseconds.
 
 ## Ramp Shape Playground
-I've created interactive graphs for each of the available ramp shapes to help dial in the best lighting schedule.
+I've created a [playground](https://www.desmos.com/calculator/vqs9qccxtg) with interactive graphs for each of the available ramp shapes to help dial in the best lighting schedule. 
 ![ramp_shape_playground_screenshot(1)](https://github.com/user-attachments/assets/3ca96f93-9ad0-457e-9949-47ad255f9460)
 
 ## Flashing Firmware and Initial Configuration

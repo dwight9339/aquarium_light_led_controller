@@ -38,6 +38,7 @@ You can then follow the instructions provided [here](https://tasmota.github.io/d
 ## Home Assistant Override Entity Controller
 To implement an entity that can override the aquarium light in Home Assistant, make sure that you have set the light up as an MQTT client as described in the previous sections then add the following code to your `configuration.yaml` file:
 ```
+# Aquarium light override controls
 mqtt:
   - light:
       schema: json

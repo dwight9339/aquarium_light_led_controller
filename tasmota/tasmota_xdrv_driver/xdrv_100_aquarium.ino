@@ -348,7 +348,7 @@ void UpdateAquariumBrightness() {
     // Handle override
     if (Settings->free_eb0.aquarium_light_settings.override_enabled) {
         uint8_t* override_color = Settings->free_eb0.aquarium_light_settings.override_color;
-        uint8_t channels[5] = {override_color[0], override_color[1], override_color[2], override_color[3], override_color[3]};
+        uint8_t channels[5] = {override_color[0], override_color[1], override_color[2], override_color[3], 0};
         light_controller.changeChannels(channels, true);
         AddLog(LOG_LEVEL_DEBUG, PSTR("Aquarium override enabled: Setting color RGBW(%d,%d,%d,%d)"),
                override_color[0], override_color[1], override_color[2], override_color[3]);

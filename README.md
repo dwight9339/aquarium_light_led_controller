@@ -3,17 +3,26 @@
 
 # Aquarium LED Controller
 The project implements a custom driver for Tasmota that turns an ESP8266-based device into an aquarium light controller for RGBW LED strips. The custom functionality is fairly simple, implementing only two main features:
-- **Onboard Brightness Ramping**: Brightness smoothly ramps from 0 to a specified full brightness value for each RGBW channel and back down to 0 over the course of a day between specified sunrise and sunset times following a sine-squared function. Implementing brightness ramping directly on the controller makes it more robust against wireless connectivity issues associated with controlling the light via a central home automation server and relieves such a server from having to execute updates at the rates required to produce a smooth lighting curve.
+- **Onboard Brightness Ramping**: Brightness smoothly ramps from 0 to a specified full brightness value for each RGBW channel and back down to 0 over each day. Implementing brightness ramping directly on the controller makes it more robust against wireless connectivity issues associated with controlling the light via a central home automation server and relieves such a server from having to execute updates at the rates required to produce a smooth lighting curve.
+- **Custom Ramp Configuration**: Users can configure the ramp shape, ramp time, peak hold time, and steepness for precise control over their lighting schedule.
 - **Override of Default Functionality**: The ramping functionality described previously is the default for the device but can be overridden, if desired, to make the light essentially just a normal LED smart light.
 
 ## Custom Commands
 The following commands can be executed either in the Tasmota web console or via MQTT to update lighting parameters:
 - `UpdateSunriseTime {hh}:{mm}`: Sets the `sunrise_hour` and `sunrise_minute` parameters to hour (`hh`) and minute (`mm`) respectively.
-- `UpdateSunsetTime {hh}:{mm}`: Sets the `sunset_hour` and `ssunset_minute` parameters to hour (`hh`) and minute (`mm`) respectively.
 - `UpdatePeakBrightness {r},{g},{b},{w}`: Sets the maximum brightness (0-255) reached by each of the light channels (R, G, B, and W(cold white or warm white depending on your LED strip)).
 - `ToggleOverride`: Toggles the parameter which determines whether or not the default functionality is overridden.
+- `UpdateRampShape {0-2}`: Sets the ramp shape. 0 = sine, 1 = S-curve, 2 = linear.
+- `UpdateSteepness {0.0-65.0}`: Adjusts the steepness parameter used by the S-curve ramp.
+- `UpdateRampTime {minutes}`: Sets the length for each ramp cycle (up and down) in minutes. Accepts values between 0 and 1440 (24 hours).
+- `UpdatePeakHoldTime {minutes}`: Sets the length of time (in minutes) that the light is held at peak brightness between ramp cycles. Accepts values between 0 and 1440 (24 hours).
 - `UpdateOverrideColor {r},{g},{b},{w}`: Sets the brightness (0-255) for each channel when the default functionality is overridden.
 - `UpdateOverride`: Mainly used when implementing MQTT-based controls in smart home systems like Home Assistant. Updates the override parameters (on-off and channel brightnesses) but expects a JSON object of the form: <br></br> `{"status": "ON|OFF", "color": {"r":{0-255}, "g": {0-255}, "b": {0-255}, "w": {0-255}}}` <br></br>
+- `UpdateUpdateFrequency {0-3}`: Adjusts the light update frequency setting. Changing this is not advised. The default setting (every 250 seconds) currently provides the best results in transition smoothing tests. 0 = every second, 1 = every 250 milliseconds, 2 = every 100 milliseconds, 3 = every 50 milliseconds.
+
+## Ramp Shape Playground
+I've created a [playground](https://www.desmos.com/calculator/vqs9qccxtg) with interactive graphs for each of the available ramp shapes to help dial in the best lighting schedule. 
+![ramp_shape_playground_screenshot(1)](https://github.com/user-attachments/assets/3ca96f93-9ad0-457e-9949-47ad255f9460)
 
 ## Flashing Firmware and Initial Configuration
 To install the firmware on your device and connect it to your home network, download the latest build [here](https://github.com/dwight9339/aquarium_light_led_controller/releases) and follow the instructions provided [here](https://tasmota.github.io/docs/Getting-Started/).
@@ -29,6 +38,7 @@ You can then follow the instructions provided [here](https://tasmota.github.io/d
 ## Home Assistant Override Entity Controller
 To implement an entity that can override the aquarium light in Home Assistant, make sure that you have set the light up as an MQTT client as described in the previous sections then add the following code to your `configuration.yaml` file:
 ```
+# Aquarium light override controls
 mqtt:
   - light:
       schema: json

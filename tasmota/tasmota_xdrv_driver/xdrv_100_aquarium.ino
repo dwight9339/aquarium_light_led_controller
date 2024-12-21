@@ -318,7 +318,7 @@ void UpdateChannelsSmooth(uint8_t peak_color[4], float brightness_factor, float 
         (uint8_t)current_G, 
         (uint8_t)current_B, 
         (uint8_t)current_W, 
-        (uint8_t)current_W
+        0
     };
 
     light_controller.changeChannels(channels, false);
@@ -370,7 +370,7 @@ void UpdateAquariumBrightness() {
     // If inside peak hold phase...
     if (i > ramp_time_ms && i <= ramp_time_ms + peak_hold_time_ms) {
         // Set channels to peak brightness
-        uint8_t channels[5] = {peak_color[0], peak_color[1], peak_color[2], peak_color[3], peak_color[3]};
+        uint8_t channels[5] = {peak_color[0], peak_color[1], peak_color[2], peak_color[3], 0};
         light_controller.changeChannels(channels, false);
         AddLog(LOG_LEVEL_DEBUG, PSTR("Holding at peak brightness."));
         return;

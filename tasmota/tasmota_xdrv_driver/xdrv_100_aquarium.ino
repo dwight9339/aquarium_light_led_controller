@@ -85,8 +85,8 @@ void CmdUpdateRampShape(void) {
 }
 
 void CmdUpdateRampTime(void) {
-    uint8_t time;
-    if (sscanf(XdrvMailbox.data, "%hhu", &time) == 1) {
+    uint16_t time;
+    if (sscanf(XdrvMailbox.data, "%u", &time) == 1) {
         if (time > 1440) {
             ResponseCmndChar(PSTR("Maximum ramp time is 1440 minutes."));
         } else {
@@ -100,8 +100,8 @@ void CmdUpdateRampTime(void) {
 }
 
 void CmdUpdatePeakHoldTime(void) {
-    uint8_t time;
-    if (sscanf(XdrvMailbox.data, "%hhu", &time) == 1) {
+    uint16_t time;
+    if (sscanf(XdrvMailbox.data, "%u", &time) == 1) {
         if (time > 1440) {
             ResponseCmndChar(PSTR("Maximum peak hold time is 1440 minutes."));
         } else {
